@@ -3,956 +3,1049 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SimilarWeb Credit Calculator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<title>Obley's Financial Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root {
-  --navy: #002b6b;
-  --cyan: #00bcd4;
-  --cyan-light: #e0f7fa;
-  --white: #ffffff;
-  --bg: #f5f7fb;
-  --bg2: #eef1f8;
-  --card: #ffffff;
-  --border: rgba(0,43,107,0.10);
-  --border-strong: rgba(0,43,107,0.18);
-  --text: #0d1b2e;
-  --text2: #4a5f7a;
-  --text3: #8a9ab0;
-  --green: #0f6e56;
-  --green-bg: #e1f5ee;
-  --amber: #ba7517;
-  --amber-bg: #faeeda;
-  --red: #a32d2d;
-  --red-bg: #fcebeb;
-  --blue: #185fa5;
-  --blue-bg: #e6f1fb;
-  --radius: 10px;
-  --radius-lg: 16px;
-  --shadow: 0 2px 12px rgba(0,43,107,0.07);
-  --shadow-lg: 0 4px 24px rgba(0,43,107,0.10);
-}
+  :root {
+    --bg-base: #0d0f14;
+    --bg-card: #161a22;
+    --bg-card2: #1e2330;
+    --bg-input: #252c3a;
+    --border: #2e3648;
+    --border-light: #3d4a60;
+    --accent: #6c8eff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e8ecf4;
+    --text-muted: #8a94aa;
+    --text-dim: #5a6478;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg-base); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; font-size: 14px; }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  /* TOP BAR */
+  .topbar { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 58px; position: sticky; top: 0; z-index: 100; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); }
+  .logo span { color: var(--accent); }
+  .user-tabs { display: flex; background: var(--bg-base); border-radius: 8px; padding: 3px; gap: 2px; border: 1px solid var(--border); }
+  .user-tab { padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-muted); transition: all 0.2s; white-space: nowrap; border: none; background: none; }
+  .user-tab.active { background: var(--accent); color: #fff; }
+  .user-tab[data-user="family"].active { background: var(--accent2); }
+  .topbar-right { display: flex; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-card2); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #5577ee; border-color: #5577ee; color: #fff; }
+  .btn.danger { background: none; border-color: var(--border); color: var(--red); }
+  .btn.danger:hover { border-color: var(--red); background: rgba(248,113,113,0.08); }
+  .btn.success { background: none; border-color: var(--border); color: var(--green); }
+  .btn.success:hover { border-color: var(--green); background: rgba(52,211,153,0.08); }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.6;
-}
+  /* LAYOUT */
+  .main { display: flex; height: calc(100vh - 58px); }
+  .sidebar { width: 200px; background: var(--bg-card); border-right: 1px solid var(--border); padding: 16px 0; flex-shrink: 0; overflow-y: auto; }
+  .nav-section { padding: 0 12px 8px; }
+  .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); padding: 0 8px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; cursor: pointer; color: var(--text-muted); font-size: 13px; font-weight: 500; transition: all 0.15s; margin-bottom: 1px; }
+  .nav-item:hover { background: var(--bg-card2); color: var(--text); }
+  .nav-item.active { background: rgba(108,142,255,0.12); color: var(--accent); }
+  .nav-item .icon { font-size: 15px; width: 18px; text-align: center; }
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
 
-/* HEADER */
-.header {
-  background: var(--navy);
-  padding: 0 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.header-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.logo-mark {
-  width: 28px;
-  height: 28px;
-  background: var(--cyan);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.logo-mark svg { width: 16px; height: 16px; fill: var(--navy); }
-.logo-text { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
-.logo-text span { color: var(--cyan); }
-.header-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: rgba(255,255,255,0.45);
-  background: rgba(255,255,255,0.07);
-  padding: 3px 9px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
-}
+  /* PAGE HEADERS */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 20px; font-weight: 700; }
+  .page-title .sub { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
+  .page { display: none; }
+  .page.active { display: block; }
 
-/* LAYOUT */
-.page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  /* STAT CARDS */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 8px; }
+  .stat-value { font-size: 22px; font-weight: 700; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.accent { color: var(--accent); }
+  .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-/* HERO STRIP */
-.hero { margin-bottom: 1.75rem; }
-.hero h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--navy);
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
-}
-.hero p { font-size: 13px; color: var(--text2); max-width: 520px; }
+  /* TABLES */
+  .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .section-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+  .badge.income { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge.expense { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge.invest { background: rgba(167,139,250,0.15); color: var(--accent2); }
+  .badge.loan { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 18px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--bg-card2); }
+  td { padding: 11px 18px; border-bottom: 1px solid rgba(46,54,72,0.5); font-size: 13px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(108,142,255,0.04); }
+  .td-actions { display: flex; gap: 6px; }
+  .icon-btn { background: none; border: 1px solid var(--border); border-radius: 5px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: var(--text-muted); transition: all 0.15s; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.del:hover { border-color: var(--red); color: var(--red); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill.ongoing { background: rgba(52,211,153,0.1); color: var(--green); }
+  .pill.completed { background: rgba(90,100,120,0.2); color: var(--text-dim); }
+  .pill.overdue { background: rgba(248,113,113,0.1); color: var(--red); }
 
-/* BUDGET BAR */
-.budget-card {
-  background: var(--navy);
-  border-radius: var(--radius-lg);
-  padding: 1.1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-.budget-card label {
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-}
-.budget-input-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: var(--radius);
-  padding: 6px 12px;
-  flex: 1;
-  min-width: 200px;
-  max-width: 280px;
-}
-.budget-input-group span { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--cyan); }
-.budget-input-group input {
-  background: none;
-  border: none;
-  outline: none;
-  color: #fff;
-  font-family: 'DM Mono', monospace;
-  font-size: 15px;
-  width: 100%;
-  font-weight: 500;
-}
-.budget-input-group input::placeholder { color: rgba(255,255,255,0.25); }
-.budget-info {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  margin-left: auto;
-}
-.budget-stat { text-align: right; }
-.budget-stat .bs-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; color: #fff; }
-.budget-stat .bs-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; }
-.budget-meter { flex: 1; min-width: 160px; }
-.budget-meter-label { display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 5px; font-family: 'DM Mono', monospace; }
-.budget-track { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
-.budget-fill { height: 100%; border-radius: 3px; transition: width 0.35s ease, background 0.35s; }
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 500px; max-width: 95vw; max-height: 85vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid.single { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  input, select, textarea { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; color: var(--text); font-size: 13px; width: 100%; outline: none; transition: border-color 0.15s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--bg-card2); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
 
-/* MAIN GRID */
-.main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 1.25rem; align-items: start; }
-@media(max-width:900px){ .main-grid { grid-template-columns:1fr; } }
+  /* CHART AREA */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .chart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+  .chart-title { font-size: 13px; font-weight: 600; margin-bottom: 14px; color: var(--text-muted); }
+  .chart-wrap { position: relative; height: 220px; }
+  .chart-wrap.tall { height: 300px; }
 
-/* TABS */
-.tab-bar {
-  display: flex;
-  gap: 0;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  overflow: hidden;
-  border-bottom: none;
-}
-.tabx {
-  padding: 11px 20px;
-  font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  color: var(--text2);
-  border-bottom: 2px solid transparent;
-  transition: all 0.15s;
-  font-weight: 400;
-}
-.tabx:hover { color: var(--text); background: var(--bg2); }
-.tabx.active {
-  color: var(--navy);
-  font-weight: 500;
-  border-bottom: 2px solid var(--cyan);
-  background: var(--card);
-}
-.tab-panel {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  padding: 1.5rem;
-  display: none;
-}
-.tab-panel.active { display: block; }
+  /* PROGRESS BARS */
+  .progress-wrap { margin-bottom: 12px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+  .progress-bar { height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
 
-/* FORM */
-.form-section-title {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text3);
-  margin: 1.1rem 0 .65rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.form-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
-.form-section-title:first-child { margin-top: 0; }
-.fg { display: grid; gap: 10px; margin-bottom: 10px; }
-.fg-2 { grid-template-columns: 1fr 1fr; }
-.fg-3 { grid-template-columns: 1fr 1fr 1fr; }
-.field { display: flex; flex-direction: column; gap: 4px; }
-.field label { font-size: 11px; font-weight: 500; color: var(--text2); }
-.field select, .field input[type=number] {
-  background: var(--bg);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  padding: 8px 10px;
-  font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s;
-  width: 100%;
-}
-.field select:focus, .field input[type=number]:focus { border-color: var(--cyan); }
-.hint { font-size: 11px; color: var(--text3); line-height: 1.4; }
+  /* EMI CALC badge */
+  .emi-info { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+  .emi-info .months-left { color: var(--yellow); font-weight: 600; }
 
-/* FORMULA BAR */
-.formula-bar {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--navy);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 9px 13px;
-  font-size: 11.5px;
-  font-family: 'DM Mono', monospace;
-  color: var(--text2);
-  margin-bottom: 1.1rem;
-  line-height: 1.7;
-}
-.formula-bar b { color: var(--navy); font-weight: 500; }
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; font-size: 13px; z-index: 9999; display: none; transform: translateY(10px); opacity: 0; transition: all 0.25s; }
+  .toast.show { display: block; transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
 
-/* PRESETS */
-.presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
-.preset-btn {
-  font-size: 11px;
-  padding: 4px 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 20px;
-  background: transparent;
-  cursor: pointer;
-  color: var(--text2);
-  font-family: 'DM Sans', sans-serif;
-  transition: all 0.15s;
-}
-.preset-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+  /* OVERVIEW NET BAR */
+  .net-bar { display: flex; align-items: center; gap: 12px; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; font-size: 13px; }
+  .net-bar .item { display: flex; flex-direction: column; gap: 2px; }
+  .net-bar .item label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); }
+  .net-bar .divider { width: 1px; height: 30px; background: var(--border); margin: 0 4px; }
+  .net-bar .net { margin-left: auto; font-size: 16px; font-weight: 800; }
 
-/* RESULT */
-.result-block {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.1rem 1.25rem;
-  margin-top: 1.1rem;
-}
-.result-title { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 500; margin-bottom: 3px; }
-.result-total { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 3px; }
-.result-sub { font-size: 12px; color: var(--text2); margin-bottom: .75rem; }
-.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: .75rem; }
-.stat-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: .75rem; text-align: center; }
-.stat-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
-.stat-val { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; color: var(--navy); }
-.stat-sub { font-size: 10px; color: var(--text3); }
-.breakdown-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: 'DM Mono', monospace; }
-.breakdown-table td { padding: 4px 6px; border-bottom: 1px solid var(--border); }
-.breakdown-table td:last-child { text-align: right; font-weight: 500; color: var(--text); }
-.breakdown-table td:first-child { color: var(--text2); }
+  /* SUMMARY TABLE striped */
+  .summary-table td:first-child { color: var(--text-muted); }
+  .summary-table td:last-child { text-align: right; font-weight: 600; }
+  .summary-table tr.total td { border-top: 1px solid var(--border); color: var(--text); font-weight: 700; }
 
-/* BUDGET PROGRESS IN RESULT */
-.bprog { margin-bottom: .75rem; }
-.bprog-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 4px; font-family: 'DM Mono', monospace; }
-.bprog-track { height: 7px; background: var(--bg2); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
-.bprog-fill { height: 100%; border-radius: 4px; transition: width 0.35s, background 0.35s; }
+  /* EXPORT/IMPORT SECTION */
+  .io-box { background: var(--bg-card2); border: 1px dashed var(--border-light); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+  .io-box:hover { border-color: var(--accent); }
 
-/* ALERTS */
-.alert {
-  display: flex;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius);
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: 6px;
-  align-items: flex-start;
-}
-.alert-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; font-style: normal; }
-.a-green { background: var(--green-bg); border: 1px solid rgba(15,110,86,0.15); color: var(--green); }
-.a-amber { background: var(--amber-bg); border: 1px solid rgba(186,117,23,0.15); color: var(--amber); }
-.a-red { background: var(--red-bg); border: 1px solid rgba(163,45,45,0.15); color: var(--red); }
-.a-blue { background: var(--blue-bg); border: 1px solid rgba(24,95,165,0.15); color: var(--blue); }
-
-/* RESTRICTIONS */
-.restrictions {
-  margin-top: 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-.restrictions-hdr {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  background: var(--bg2);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text2);
-  user-select: none;
-  transition: background 0.15s;
-}
-.restrictions-hdr:hover { background: var(--bg); }
-.restrictions-hdr .chevron { transition: transform 0.2s; font-style: normal; }
-.restrictions-hdr.open .chevron { transform: rotate(45deg); }
-.restrictions-body { display: none; padding: 4px 0; }
-.restrictions-body.open { display: block; }
-.r-item { display: flex; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 12px; line-height: 1.5; }
-.r-item:last-child { border-bottom: none; }
-.r-dot { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-.r-red { background: var(--red-bg); color: var(--red); }
-.r-amber { background: var(--amber-bg); color: var(--amber); }
-.r-blue { background: var(--blue-bg); color: var(--blue); }
-.r-green { background: var(--green-bg); color: var(--green); }
-.r-name { font-weight: 500; color: var(--text); margin-bottom: 2px; }
-.r-desc { color: var(--text2); }
-
-/* SIDEBAR */
-.sidebar { display: flex; flex-direction: column; gap: 1rem; }
-.side-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem 1.25rem; box-shadow: var(--shadow); }
-.side-card-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: .75rem; display: flex; align-items: center; gap: 7px; }
-.side-card-title .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); }
-
-/* COMPARE CHART */
-.compare-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 1rem; }
-.cmp-card { border: 1px solid var(--border); border-radius: var(--radius); padding: .85rem; text-align: center; background: var(--bg); position: relative; }
-.cmp-card.winner { border: 2px solid var(--red); background: var(--red-bg); }
-.cmp-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--red); color: #fff; font-size: 9px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; font-weight: 500; }
-.cmp-name { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
-.cmp-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; color: var(--navy); }
-.cmp-pct { font-size: 10px; color: var(--text3); margin-top: 2px; }
-.cmp-bar { height: 4px; border-radius: 2px; margin-top: 7px; transition: width 0.35s; }
-
-/* MCP WARN */
-.mcp-warn {
-  background: linear-gradient(135deg, #fcebeb 0%, #faeeda 100%);
-  border: 1px solid rgba(163,45,45,0.2);
-  border-radius: var(--radius);
-  padding: 10px 13px;
-  font-size: 12px;
-  color: var(--red);
-  line-height: 1.5;
-  margin-bottom: .85rem;
-}
-.mcp-warn b { font-weight: 500; }
-
-/* FOOTER */
-.footer {
-  background: var(--navy);
-  color: rgba(255,255,255,0.4);
-  text-align: center;
-  padding: 1.25rem;
-  font-size: 11px;
-  font-family: 'DM Mono', monospace;
-}
-.footer a { color: var(--cyan); text-decoration: none; }
+  /* Responsive */
+  @media (max-width: 900px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    .main { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 8px; }
+    .sidebar .nav-label { display: none; }
+    .nav-section { display: flex; flex-wrap: wrap; gap: 4px; padding: 0; }
+    .nav-item { padding: 6px 10px; margin: 0; }
+  }
+  @media (max-width: 600px) {
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .topbar { padding: 0 12px; }
+    .content { padding: 14px; }
+    .user-tabs { display: none; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="header-logo">
-    <div class="logo-mark">
-      <svg viewBox="0 0 16 16"><path d="M2 12 L6 7 L9 10 L12 5 L14 7"/><polyline points="2,12 6,7 9,10 12,5 14,7" fill="none" stroke="#002b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">Obley's <span>Finance</span></div>
+    <div class="user-tabs">
+      <button class="user-tab active" data-user="family" onclick="switchUser('family')">🏠 Family</button>
+      <button class="user-tab" data-user="preeth" onclick="switchUser('preeth')">Preeth</button>
+      <button class="user-tab" data-user="padma" onclick="switchUser('padma')">Padma</button>
+      <button class="user-tab" data-user="keerthna" onclick="switchUser('keerthna')">Keerthna</button>
     </div>
-    <div class="logo-text">SimilarWeb <span>Credits</span></div>
   </div>
-  <div class="header-badge">v2.0 · Batch API · REST API · MCP</div>
-</header>
-
-<main class="page">
-
-  <div class="hero">
-    <h1>Data Credits Calculator</h1>
-    <p>Estimate credit consumption across the Batch API, REST API, and MCP before you run. Set a monthly budget and get live alerts.</p>
+  <div class="topbar-right">
+    <button class="btn success" onclick="exportData()">⬆ Export</button>
+    <button class="btn" onclick="document.getElementById('importFile').click()">⬇ Import</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
   </div>
+</div>
 
-  <!-- BUDGET CARD -->
-  <div class="budget-card">
-    <div>
-      <label>Monthly credit budget</label>
-      <div class="budget-input-group" style="margin-top:6px">
-        <span>#</span>
-        <input type="number" id="global-budget" value="1000000" placeholder="e.g. 1000000" oninput="updateAll()">
-      </div>
-    </div>
-    <div class="budget-meter" style="flex:1;min-width:200px">
-      <div class="budget-meter-label">
-        <span>Combined usage</span>
-        <span id="budget-pct-label">0%</span>
-      </div>
-      <div class="budget-track">
-        <div class="budget-fill" id="budget-fill-bar" style="width:0%;background:#1d9e75"></div>
-      </div>
-    </div>
-    <div class="budget-info">
-      <div class="budget-stat">
-        <div class="bs-val" id="bstat-used">0</div>
-        <div class="bs-label">est. used</div>
-      </div>
-      <div class="budget-stat">
-        <div class="bs-val" id="bstat-remain">1,000,000</div>
-        <div class="bs-label">remaining</div>
-      </div>
+<!-- MAIN -->
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item active" onclick="navigate('overview')"><span class="icon">📊</span> Overview</div>
+      <div class="nav-item" onclick="navigate('income')"><span class="icon">💰</span> Income</div>
+      <div class="nav-item" onclick="navigate('expenses')"><span class="icon">💸</span> Expenses</div>
+      <div class="nav-item" onclick="navigate('loans')"><span class="icon">🏦</span> Loans & EMIs</div>
+      <div class="nav-item" onclick="navigate('investments')"><span class="icon">📈</span> Investments</div>
+      <div class="nav-item" onclick="navigate('lending')"><span class="icon">🤝</span> Lending</div>
+      <div class="nav-item" onclick="navigate('charts')"><span class="icon">📉</span> Debt Charts</div>
     </div>
   </div>
 
-  <div class="main-grid">
+  <!-- CONTENT -->
+  <div class="content">
 
-    <!-- LEFT: TABS -->
-    <div>
-      <div class="tab-bar">
-        <button class="tabx active" onclick="switchTab('batch',this)">Batch API</button>
-        <button class="tabx" onclick="switchTab('rest',this)">REST API</button>
-        <button class="tabx" onclick="switchTab('mcp',this)">MCP</button>
-        <button class="tabx" onclick="switchTab('compare',this)">Compare all</button>
+    <!-- OVERVIEW PAGE -->
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <div class="page-title">Overview <div class="sub" id="overview-user-label">Family View</div></div>
+        <button class="btn primary" onclick="openAddModal('auto')">+ Add Entry</button>
       </div>
-
-      <!-- BATCH -->
-      <div class="tab-panel active" id="tab-batch">
-        <div class="formula-bar"><b>Formula:</b> domains × metric_price × metrics × cadence × months × countries = total credits</div>
-        <div class="presets">
-          <span style="font-size:11px;color:var(--text3);align-self:center">Presets:</span>
-          <button class="preset-btn" onclick="presetBatch(10,10,'1',1,1)">Small</button>
-          <button class="preset-btn" onclick="presetBatch(50,15,'1',3,2)">Medium</button>
-          <button class="preset-btn" onclick="presetBatch(100,20,'30',6,5)">Large / daily</button>
-          <button class="preset-btn" onclick="presetBatch(500,25,'4',12,10)">Enterprise</button>
+      <div class="net-bar" id="net-bar"></div>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">Monthly Cash Flow</div>
+          <div class="chart-wrap"><canvas id="cashflow-chart"></canvas></div>
         </div>
-
-        <div class="form-section-title">Dataset</div>
-        <div class="fg fg-2">
-          <div class="field">
-            <label>Metric type</label>
-            <select id="b-dataset" oninput="calcBatch()">
-              <option value="1">Website traffic &amp; engagement (1 cr/cell)</option>
-              <option value="1">Website referrals (1 cr/cell)</option>
-              <option value="1">Audience / demographics (1 cr/cell)</option>
-              <option value="1">App analysis (1 cr/cell)</option>
-              <option value="1">Company firmographics (1 cr/cell)</option>
-              <option value="1">Technographics (1 cr/cell)</option>
-              <option value="1">Ecommerce brand/category (1 cr/cell)</option>
-              <option value="0.1">Popular pages &amp; similar sites (1 cr/10)</option>
-              <option value="0.01">Keywords datasets (1 cr/100)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Number of domains</label>
-            <input type="number" id="b-domains" min="1" value="10" oninput="calcBatch()">
-            <span class="hint">Max ~10,000 domains per Batch request</span>
-          </div>
-        </div>
-
-        <div class="form-section-title">Query scope</div>
-        <div class="fg fg-3">
-          <div class="field">
-            <label>Number of metrics</label>
-            <input type="number" id="b-metrics" min="1" value="10" oninput="calcBatch()">
-          </div>
-          <div class="field">
-            <label>Cadence</label>
-            <select id="b-cadence" oninput="calcBatch()">
-              <option value="1">Monthly (×1)</option>
-              <option value="4">Weekly (×4)</option>
-              <option value="30">Daily (×30)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Country filters</label>
-            <input type="number" id="b-countries" min="1" value="1" oninput="calcBatch()">
-          </div>
-        </div>
-        <div class="fg fg-2">
-          <div class="field">
-            <label>Months of historical data</label>
-            <input type="number" id="b-months" min="1" max="61" value="3" oninput="calcBatch()">
-            <span class="hint">Max 61 mo (traffic) · 27 mo (keywords) · 1 mo (firmographics)</span>
-          </div>
-        </div>
-
-        <div id="batch-result"></div>
-        <div id="batch-restrictions"></div>
-      </div>
-
-      <!-- REST -->
-      <div class="tab-panel" id="tab-rest">
-        <div class="formula-bar"><b>Formula:</b> domains × metrics × cadence × months × countries × calls/month = monthly total. No charge if no data returned.</div>
-        <div class="presets">
-          <span style="font-size:11px;color:var(--text3);align-self:center">Presets:</span>
-          <button class="preset-btn" onclick="presetRest(10,5,'1',1,1,1)">Lightweight</button>
-          <button class="preset-btn" onclick="presetRest(50,10,'1',3,2,10)">Standard</button>
-          <button class="preset-btn" onclick="presetRest(200,20,'30',6,5,30)">Heavy pipeline</button>
-        </div>
-
-        <div class="form-section-title">Query config</div>
-        <div class="fg fg-2">
-          <div class="field"><label>Domains / entities</label><input type="number" id="r-domains" min="1" value="10" oninput="calcRest()"></div>
-          <div class="field"><label>Metrics / endpoints</label><input type="number" id="r-metrics" min="1" value="5" oninput="calcRest()"></div>
-        </div>
-        <div class="fg fg-3">
-          <div class="field">
-            <label>Cadence</label>
-            <select id="r-cadence" oninput="calcRest()">
-              <option value="1">Monthly (×1)</option>
-              <option value="4">Weekly (×4)</option>
-              <option value="30">Daily (×30)</option>
-            </select>
-          </div>
-          <div class="field"><label>Months of data</label><input type="number" id="r-months" min="1" max="61" value="3" oninput="calcRest()"></div>
-          <div class="field"><label>Country filters</label><input type="number" id="r-countries" min="1" value="1" oninput="calcRest()"></div>
-        </div>
-        <div class="fg fg-2">
-          <div class="field">
-            <label>API calls per month</label>
-            <input type="number" id="r-calls" min="1" value="1" oninput="calcRest()">
-            <span class="hint">How many times you run this query each month</span>
-          </div>
-        </div>
-
-        <div id="rest-result"></div>
-        <div id="rest-restrictions"></div>
-      </div>
-
-      <!-- MCP -->
-      <div class="tab-panel" id="tab-mcp">
-        <div class="formula-bar"><b>MCP = REST API under the hood.</b> Each prompt may fire multiple endpoint calls. Credits charged per data point returned.</div>
-        <div class="mcp-warn"><b>Known heavy example:</b> A single prompt querying Meta burned <b>568,000 credits</b> — multiple endpoints + large result sets. Monitor the Credit Management dashboard closely.</div>
-
-        <div class="form-section-title">Usage profile</div>
-        <div class="fg fg-2">
-          <div class="field">
-            <label>Profile</label>
-            <select id="m-type" oninput="calcMcp()">
-              <option value="avg">Average user (~5K–10K cr/month)</option>
-              <option value="power">Power user (50K–500K+ cr/month)</option>
-              <option value="custom">Custom — estimate by query</option>
-            </select>
-          </div>
-          <div class="field"><label>Number of users</label><input type="number" id="m-users" min="1" value="1" oninput="calcMcp()"></div>
-        </div>
-
-        <div id="mcp-custom-fields" style="display:none">
-          <div class="form-section-title">Per-query estimate</div>
-          <div class="fg fg-2">
-            <div class="field"><label>Prompts per day</label><input type="number" id="m-prompts" min="1" value="10" oninput="calcMcp()"></div>
-            <div class="field">
-              <label>API calls per prompt (est.)</label>
-              <input type="number" id="m-cpp" min="1" value="3" oninput="calcMcp()">
-              <span class="hint">Claude may call 2–6 endpoints per prompt</span>
-            </div>
-          </div>
-          <div class="fg fg-2">
-            <div class="field"><label>Data points returned per call</label><input type="number" id="m-points" min="1" value="100" oninput="calcMcp()"></div>
-            <div class="field"><label>Working days/month</label><input type="number" id="m-days" min="1" max="31" value="22" oninput="calcMcp()"></div>
-          </div>
-        </div>
-
-        <div id="mcp-result"></div>
-        <div id="mcp-restrictions"></div>
-      </div>
-
-      <!-- COMPARE -->
-      <div class="tab-panel" id="tab-compare">
-        <div class="formula-bar">Configure each tab first, then return here for a side-by-side breakdown.</div>
-        <div class="compare-grid" id="compare-cards"></div>
-        <div style="position:relative;height:240px;margin-bottom:1rem">
-          <canvas id="compare-chart" role="img" aria-label="Bar chart comparing credit usage across Batch API, REST API, and MCP"></canvas>
-        </div>
-        <div id="compare-analysis"></div>
-      </div>
-
-    </div><!-- end left -->
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-
-      <div class="side-card">
-        <div class="side-card-title"><span class="dot"></span>How credits work</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.7">
-          <p style="margin-bottom:.5rem">Every data point returned from SimilarWeb consumes credits from your monthly pool. Credits <b>expire monthly</b> — unused credits do not roll over.</p>
-          <p style="margin-bottom:.5rem"><b>Credit prices:</b></p>
-          <table style="width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:11px">
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">Most metrics</td><td style="text-align:right;color:var(--navy);font-weight:500">1 cr / cell</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">Popular pages</td><td style="text-align:right;color:var(--navy);font-weight:500">1 cr / 10 results</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">Similar sites</td><td style="text-align:right;color:var(--navy);font-weight:500">1 cr / 10 results</td></tr>
-            <tr><td style="padding:3px 0;color:var(--text2)">Keywords</td><td style="text-align:right;color:var(--navy);font-weight:500">1 cr / 100 results</td></tr>
-          </table>
+        <div class="chart-card">
+          <div class="chart-title">Expense Breakdown</div>
+          <div class="chart-wrap"><canvas id="expense-pie-chart"></canvas></div>
         </div>
       </div>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">Summary <span class="badge income">Current Month</span></div>
+        </div>
+        <table class="summary-table" id="summary-table"></table>
+      </div>
+    </div>
 
-      <div class="side-card">
-        <div class="side-card-title"><span class="dot"></span>Historical data limits</div>
-        <div style="font-size:12px;line-height:1.7">
-          <table style="width:100%;border-collapse:collapse;font-size:11px">
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">Traffic &amp; engagement</td><td style="text-align:right;color:var(--navy);font-family:'DM Mono',monospace">61 months</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">Referrals / channels</td><td style="text-align:right;color:var(--navy);font-family:'DM Mono',monospace">37 months</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">Audience / demographics</td><td style="text-align:right;color:var(--navy);font-family:'DM Mono',monospace">33–37 months</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">Keywords</td><td style="text-align:right;color:var(--navy);font-family:'DM Mono',monospace">20–27 months</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">App analysis</td><td style="text-align:right;color:var(--navy);font-family:'DM Mono',monospace">28–36 months</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:3px 0;color:var(--text2)">Ecommerce / shopper</td><td style="text-align:right;color:var(--navy);font-family:'DM Mono',monospace">37 months</td></tr>
-            <tr><td style="padding:3px 0;color:var(--text2)">Firmographics</td><td style="text-align:right;color:var(--navy);font-family:'DM Mono',monospace">1 month only</td></tr>
-          </table>
+    <!-- INCOME PAGE -->
+    <div class="page" id="page-income">
+      <div class="page-header">
+        <div class="page-title">Income Sources</div>
+        <button class="btn primary" onclick="openAddModal('income')">+ Add Income</button>
+      </div>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">All Income <span class="badge income">Monthly</span></div>
+        </div>
+        <table>
+          <thead><tr><th>Source</th><th>User</th><th>Amount/Month</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="income-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EXPENSES PAGE -->
+    <div class="page" id="page-expenses">
+      <div class="page-header">
+        <div class="page-title">Recurring Expenses</div>
+        <button class="btn primary" onclick="openAddModal('expense')">+ Add Expense</button>
+      </div>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">All Expenses <span class="badge expense">Monthly</span></div>
+        </div>
+        <table>
+          <thead><tr><th>Expense</th><th>User</th><th>Amount/Month</th><th>Frequency</th><th>Tenure</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="expense-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LOANS PAGE -->
+    <div class="page" id="page-loans">
+      <div class="page-header">
+        <div class="page-title">Loans & EMIs</div>
+        <button class="btn primary" onclick="openAddModal('loan')">+ Add Loan</button>
+      </div>
+      <div class="stat-grid" id="loan-stats"></div>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">Active Loans <span class="badge loan">EMI Auto-calc</span></div>
+        </div>
+        <table>
+          <thead><tr><th>Loan</th><th>User</th><th>EMI/Month</th><th>Outstanding</th><th>End Date</th><th>Months Left</th><th>Interest</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="loan-tbody"></tbody>
+        </table>
+      </div>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">Short-term / App Loans <span class="badge loan">BNPL</span></div>
+        </div>
+        <table>
+          <thead><tr><th>Provider</th><th>User</th><th>EMI</th><th>Outstanding</th><th>Months Left</th><th>Interest Rate</th><th>Actions</th></tr></thead>
+          <tbody id="short-loan-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INVESTMENTS PAGE -->
+    <div class="page" id="page-investments">
+      <div class="page-header">
+        <div class="page-title">Investments</div>
+        <button class="btn primary" onclick="openAddModal('investment')">+ Add Investment</button>
+      </div>
+      <div class="stat-grid" id="invest-stats"></div>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">All Investments <span class="badge invest">SIPs & More</span></div>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>User</th><th>Monthly</th><th>Total Invested</th><th>Est. Returns</th><th>End Year</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="invest-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LENDING PAGE -->
+    <div class="page" id="page-lending">
+      <div class="page-header">
+        <div class="page-title">Lending Tracker</div>
+        <button class="btn primary" onclick="openAddModal('lending')">+ Add Lending</button>
+      </div>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">Money Lent Out <span class="badge loan">Receivable</span></div>
+        </div>
+        <table>
+          <thead><tr><th>To</th><th>Lent By</th><th>Date</th><th>Lent Amount</th><th>Balance</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="lending-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CHARTS PAGE -->
+    <div class="page" id="page-charts">
+      <div class="page-header">
+        <div class="page-title">Debt Payoff Charts</div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">Total Debt Over Time (All Users)</div>
+          <div class="chart-wrap tall"><canvas id="debt-timeline-chart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Debt by User</div>
+          <div class="chart-wrap"><canvas id="debt-user-chart"></canvas></div>
         </div>
       </div>
-
-      <div class="side-card">
-        <div class="side-card-title"><span class="dot"></span>Example calculations</div>
-        <div style="font-size:11px;color:var(--text2);line-height:1.8;font-family:'DM Mono',monospace">
-          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border)">10 × 10 × monthly × 2mo × 1 country<br><span style="color:var(--navy);font-weight:500">= 200 credits</span></div>
-          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border)">10 × 10 × daily × 2mo × 2 countries<br><span style="color:var(--navy);font-weight:500">= 12,000 credits</span></div>
-          <div>50 × 15 × weekly × 6mo × 3 countries<br><span style="color:var(--navy);font-weight:500">= 54,000 credits</span></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">Preeth — Loan Payoff Timeline</div>
+          <div class="chart-wrap tall"><canvas id="preeth-debt-chart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Monthly EMI Load vs Income</div>
+          <div class="chart-wrap tall"><canvas id="emi-vs-income-chart"></canvas></div>
         </div>
       </div>
-
-      <div class="side-card">
-        <div class="side-card-title"><span class="dot"></span>MCP reference ranges</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.7">
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px"><span>Average user</span><span style="font-family:'DM Mono',monospace;color:var(--navy)">5K–10K/mo</span></div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px"><span>Power user</span><span style="font-family:'DM Mono',monospace;color:var(--navy)">50K–500K/mo</span></div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px"><span>Heavy single prompt</span><span style="font-family:'DM Mono',monospace;color:var(--red)">568K</span></div>
-          <p style="font-size:11px;color:var(--text3);margin-top:6px">Numbers are directional — Product validation ongoing. Real-time per-query output coming soon.</p>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">Debt Payoff Milestones</div>
         </div>
+        <table>
+          <thead><tr><th>Loan</th><th>User</th><th>Outstanding</th><th>Monthly EMI</th><th>End Date</th><th>% Paid</th></tr></thead>
+          <tbody id="milestone-tbody"></tbody>
+        </table>
       </div>
+    </div>
 
-      <div class="side-card">
-        <div class="side-card-title"><span class="dot"></span>Useful links</div>
-        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
-          <a href="https://developers.similarweb.com" target="_blank" style="color:var(--blue);text-decoration:none">→ API Documentation</a>
-          <a href="https://support.similarweb.com" target="_blank" style="color:var(--blue);text-decoration:none">→ Knowledge Center</a>
-          <a href="https://app.similarweb.com" target="_blank" style="color:var(--blue);text-decoration:none">→ Credit Management Dashboard</a>
-        </div>
-      </div>
+  </div>
+</div>
 
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add Entry</div>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveEntry()">Save</button>
     </div>
   </div>
-</main>
+</div>
 
-<footer class="footer">
-  SimilarWeb Credit Calculator · Estimates only — use <code>request-validate</code> endpoint for Batch API pre-run quotes · Credits expire monthly and do not roll over · <a href="https://developers.similarweb.com" target="_blank">docs</a>
-</footer>
+<div class="toast" id="toast"></div>
 
 <script>
-var batchTotal=0, restTotal=0, mcpLow=0, mcpHigh=0;
-var cmpChart=null;
+// ===== DATA STORE =====
+const DEFAULT_DATA = {
+  income: [
+    { id: 'i1', name: '1st Floor (2 Ladies)', user: 'family', amount: 7000, type: 'Rental', status: 'Ongoing' },
+    { id: 'i2', name: '2nd Floor 1RK', user: 'family', amount: 5000, type: 'Rental', status: 'Ongoing' },
+    { id: 'i3', name: '2nd Floor 1BHK', user: 'family', amount: 13000, type: 'Rental', status: 'Ongoing' },
+    { id: 'i4', name: 'IOB PF', user: 'family', amount: 2000, type: 'PF', status: 'Ongoing' },
+  ],
+  expenses: [
+    { id: 'e1', name: 'Granny Caretaker', user: 'family', amount: 34100, frequency: 'Monthly', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e2', name: 'Granny Meds', user: 'family', amount: 10000, frequency: 'Monthly', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e3', name: 'Electricity', user: 'family', amount: 2200, frequency: 'Monthly', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e4', name: 'Gas', user: 'family', amount: 625, frequency: 'Monthly', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e5', name: 'Internet', user: 'family', amount: 1300, frequency: 'Monthly', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e6', name: 'Mobile', user: 'family', amount: 1183, frequency: 'Monthly', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e7', name: 'Sathya Provision (Family)', user: 'family', amount: 5000, frequency: 'Monthly', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e8', name: 'Sathya Provision', user: 'padma', amount: 5000, frequency: 'Monthly', tenure: 'Recurring', status: 'Ongoing' },
+    { id: 'e9', name: 'Power BI', user: 'padma', amount: 2000, frequency: 'Monthly', tenure: 'Recurring', status: 'Ongoing' },
+    { id: 'e10', name: 'Gas Cylinder', user: 'padma', amount: 850, frequency: 'Monthly', tenure: 'Recurring', status: 'Ongoing' },
+    { id: 'e11', name: 'Commute', user: 'padma', amount: 4000, frequency: 'Monthly', tenure: 'Recurring', status: 'Ongoing' },
+    { id: 'e12', name: 'Term Loan TATA AIA', user: 'preeth', amount: 1583, frequency: 'Annual', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e13', name: 'Medical Insurance', user: 'preeth', amount: 1042, frequency: 'Annual', tenure: 'EOL', status: 'Ongoing' },
+    { id: 'e14', name: 'Car Insurance', user: 'preeth', amount: 667, frequency: 'Annual', tenure: '~2030', status: 'Ongoing' },
+    { id: 'e15', name: 'Ather Insurance', user: 'preeth', amount: 208, frequency: 'Annual', tenure: '~2030', status: 'Ongoing' },
+    { id: 'e16', name: 'OTT Subscriptions', user: 'preeth', amount: 1000, frequency: 'Annual', tenure: 'EOL', status: 'Ongoing' },
+  ],
+  loans: [
+    { id: 'l1', name: 'HDFC Personal Loan', user: 'preeth', emi: 45737, outstanding: 2744220, principal: 1525000, endDate: '2031-02', interestTotal: 1219220, interestRate: null, status: 'Ongoing' },
+    { id: 'l2', name: 'ICICI Personal Loan', user: 'preeth', emi: 17745, outstanding: 1064700, principal: 810000, endDate: '2030-09', interestTotal: 254700, interestRate: null, status: 'Ongoing' },
+    { id: 'l3', name: 'Home Loan', user: 'keerthna', emi: 5000, outstanding: 0, principal: 300000, endDate: '2030-04', interestTotal: 0, interestRate: null, status: 'Completed' },
+  ],
+  shortLoans: [
+    { id: 'sl1', name: 'Kridit Bee', user: 'preeth', emi: 6645, outstanding: 59805, months: 9, interestRate: 24 },
+    { id: 'sl2', name: 'Navi', user: 'preeth', emi: 8030, outstanding: 112420, months: 14, interestRate: 25.23 },
+    { id: 'sl3', name: 'Bajaj 1', user: 'preeth', emi: 5115, outstanding: 51150, months: 10, interestRate: 0 },
+    { id: 'sl4', name: 'Bajaj 2 (8M)', user: 'preeth', emi: 4118, outstanding: 32944, months: 8, interestRate: 0 },
+    { id: 'sl5', name: 'Bajaj 2 (6M)', user: 'preeth', emi: 6667, outstanding: 40002, months: 6, interestRate: 0 },
+  ],
+  investments: [
+    { id: 'inv1', name: 'Mutual Funds 1', user: 'preeth', monthly: 5000, totalInvested: 1800000, estReturns: 35049103, endYear: 2054, status: 'Ongoing' },
+    { id: 'inv2', name: 'Mutual Funds 2', user: 'preeth', monthly: 18000, totalInvested: 6480000, estReturns: 126176771, endYear: 2054, status: 'Ongoing' },
+    { id: 'inv3', name: 'Mutual Funds 3', user: 'preeth', monthly: 2000, totalInvested: 720000, estReturns: 35049103, endYear: 2054, status: 'Ongoing' },
+    { id: 'inv4', name: 'Mutual Funds', user: 'keerthna', monthly: 3000, totalInvested: 0, estReturns: 0, endYear: 2058, status: 'Ongoing' },
+    { id: 'inv5', name: 'Gold', user: 'keerthna', monthly: 10000, totalInvested: 0, estReturns: 0, endYear: 2058, status: 'Ongoing' },
+  ],
+  lending: [
+    { id: 'ld1', name: 'Motta Mama', lentBy: 'preeth', date: '2025-11', lentAmount: 10000, balance: 5000, dueDate: '2026-01', status: 'Ongoing' },
+    { id: 'ld2', name: 'Keerthna Vijayan', lentBy: 'preeth', date: '2026-01', lentAmount: 18500, balance: 2000, dueDate: '2026-02', status: 'Ongoing' },
+    { id: 'ld3', name: 'Sharada', lentBy: 'preeth', date: '2026-02', lentAmount: 32000, balance: 35000, dueDate: '2026-12', status: 'Ongoing' },
+    { id: 'ld4', name: 'Sharada (2)', lentBy: 'preeth', date: '2026-02', lentAmount: 5758, balance: 5758, dueDate: '2026-06', status: 'Ongoing' },
+  ]
+};
 
-function fmt(n){ return Math.round(n).toLocaleString(); }
-function pct(v,max){ return max>0 ? Math.min(100,Math.round(v/max*100)) : 0; }
-function getBudget(){ return parseInt(document.getElementById('global-budget').value)||0; }
-
-function switchTab(t,el){
-  document.querySelectorAll('.tabx').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('tab-'+t).classList.add('active');
-  if(t==='compare') renderCompare();
+function loadData() {
+  try {
+    const saved = localStorage.getItem('obleys_finance_v2');
+    return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
 }
 
-function updateBudgetBar(){
-  var budget=getBudget();
-  var combined=batchTotal+restTotal+Math.round((mcpLow+mcpHigh)/2||0);
-  var p=pct(combined,budget);
-  var fill=p>=100?'#e24b4a':p>=80?'#ba7517':'#1d9e75';
-  var bar=document.getElementById('budget-fill-bar');
-  bar.style.width=p+'%';
-  bar.style.background=fill;
-  document.getElementById('budget-pct-label').textContent=p+'%';
-  document.getElementById('bstat-used').textContent=fmt(combined);
-  document.getElementById('bstat-remain').textContent=fmt(Math.max(0,budget-combined));
+function saveData() {
+  localStorage.setItem('obleys_finance_v2', JSON.stringify(DATA));
+  renderAll();
 }
 
-function budgetProgressHtml(val, label){
-  var budget=getBudget();
-  if(!budget) return '';
-  var p=pct(val,budget);
-  var fill=p>=100?'#e24b4a':p>=80?'#ba7517':'#1d9e75';
-  var alert='';
-  if(p>=100) alert='<div class="alert a-red"><i class="alert-icon">✕</i><div><b>Over budget!</b> Exceeds monthly budget by '+fmt(val-budget)+' credits. Reduce domains, metrics, or historical range.</div></div>';
-  else if(p>=80) alert='<div class="alert a-amber"><i class="alert-icon">!</i><div><b>Near limit ('+p+'%).</b> This query uses most of your monthly budget. Leave headroom for other queries.</div></div>';
-  else alert='<div class="alert a-green"><i class="alert-icon">✓</i><div>Within budget — '+p+'% used, '+fmt(budget-val)+' credits remaining.</div></div>';
-  return '<div class="bprog"><div class="bprog-row"><span>'+fmt(val)+' of '+fmt(budget)+'</span><span>'+p+'%</span></div><div class="bprog-track"><div class="bprog-fill" style="width:'+p+'%;background:'+fill+'"></div></div></div>'+alert;
+let DATA = loadData();
+let currentUser = 'family';
+let currentPage = 'overview';
+let editingEntry = null;
+let editingType = null;
+let chartInstances = {};
+
+// ===== HELPERS =====
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const fmtL = n => {
+  if (n >= 10000000) return '₹' + (n/10000000).toFixed(2) + 'Cr';
+  if (n >= 100000) return '₹' + (n/100000).toFixed(2) + 'L';
+  return fmt(n);
+};
+
+function monthsLeft(endDate) {
+  if (!endDate || endDate === 'EOL' || endDate === 'Recurring') return null;
+  const [yr, mo] = endDate.split('-').map(Number);
+  const now = new Date();
+  const diff = (yr - now.getFullYear()) * 12 + (mo - now.getMonth());
+  return Math.max(0, diff);
 }
 
-function buildRestrictions(items){
-  var id='r'+Math.random().toString(36).slice(2,7);
-  var html='<div class="restrictions"><div class="restrictions-hdr" onclick="toggleR(this)"><span>Restrictions &amp; things to know <span style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1px 7px;font-family:\'DM Mono\',monospace;font-size:10px;margin-left:4px">'+items.length+'</span></span><i class="chevron">+</i></div><div class="restrictions-body">';
-  items.forEach(function(it){
-    var cls=it.type==='red'?'r-red':it.type==='amber'?'r-amber':it.type==='blue'?'r-blue':'r-green';
-    var sym=it.type==='red'?'✕':it.type==='amber'?'!':it.type==='blue'?'i':'✓';
-    html+='<div class="r-item"><div class="r-dot '+cls+'">'+sym+'</div><div><div class="r-name">'+it.name+'</div><div class="r-desc">'+it.desc+'</div></div></div>';
+function filterByUser(arr) {
+  if (currentUser === 'family') return arr;
+  return arr.filter(x => x.user === currentUser || x.lentBy === currentUser);
+}
+
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function genId() { return '_' + Math.random().toString(36).substr(2, 9); }
+
+// ===== NAVIGATION =====
+function navigate(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+  renderAll();
+}
+
+function switchUser(user) {
+  currentUser = user;
+  document.querySelectorAll('.user-tab').forEach(t => t.classList.toggle('active', t.dataset.user === user));
+  renderAll();
+}
+
+// ===== RENDER ALL =====
+function renderAll() {
+  renderOverview();
+  renderIncome();
+  renderExpenses();
+  renderLoans();
+  renderInvestments();
+  renderLending();
+  renderCharts();
+}
+
+// ===== OVERVIEW =====
+function renderOverview() {
+  const income = filterByUser(DATA.income);
+  const expenses = filterByUser(DATA.expenses);
+  const loans = filterByUser(DATA.loans);
+  const shortLoans = filterByUser(DATA.shortLoans);
+  const investments = filterByUser(DATA.investments);
+
+  const totalIncome = income.reduce((s, x) => s + x.amount, 0);
+  const totalExpense = expenses.reduce((s, x) => s + x.amount, 0);
+  const totalLoanEMI = loans.filter(l => l.status !== 'Completed').reduce((s, x) => s + x.emi, 0);
+  const totalShortEMI = shortLoans.reduce((s, x) => s + x.emi, 0);
+  const totalInvest = investments.reduce((s, x) => s + x.monthly, 0);
+  const totalOut = totalExpense + totalLoanEMI + totalShortEMI + totalInvest;
+  const net = totalIncome - totalOut;
+
+  document.getElementById('overview-user-label').textContent = currentUser === 'family' ? 'Family View' : currentUser.charAt(0).toUpperCase() + currentUser.slice(1) + "'s View";
+
+  // Net bar
+  document.getElementById('net-bar').innerHTML = `
+    <div class="item"><label>Income</label><span style="color:var(--green);font-weight:700;">${fmt(totalIncome)}</span></div>
+    <div class="divider"></div>
+    <div class="item"><label>Expenses</label><span style="color:var(--red);font-weight:700;">${fmt(totalExpense)}</span></div>
+    <div class="divider"></div>
+    <div class="item"><label>Loan EMIs</label><span style="color:var(--yellow);font-weight:700;">${fmt(totalLoanEMI + totalShortEMI)}</span></div>
+    <div class="divider"></div>
+    <div class="item"><label>Investments</label><span style="color:var(--accent2);font-weight:700;">${fmt(totalInvest)}</span></div>
+    <div class="net" style="color:${net >= 0 ? 'var(--green)' : 'var(--red)'}">Net: ${fmt(net)}</div>
+  `;
+
+  // Stat cards
+  const totalDebt = loans.filter(l => l.status !== 'Completed').reduce((s, x) => s + x.outstanding, 0)
+    + shortLoans.reduce((s, x) => s + x.outstanding, 0);
+  const totalEstReturns = investments.reduce((s, x) => s + x.estReturns, 0);
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Monthly Income</div><div class="stat-value green">${fmt(totalIncome)}</div><div class="stat-sub">${income.length} sources</div></div>
+    <div class="stat-card"><div class="stat-label">Monthly Expenses</div><div class="stat-value red">${fmt(totalExpense)}</div><div class="stat-sub">${expenses.length} items</div></div>
+    <div class="stat-card"><div class="stat-label">Total EMIs</div><div class="stat-value yellow">${fmt(totalLoanEMI + totalShortEMI)}</div><div class="stat-sub">${loans.filter(l => l.status !== 'Completed').length + shortLoans.length} active loans</div></div>
+    <div class="stat-card"><div class="stat-label">Investments SIP</div><div class="stat-value" style="color:var(--accent2)">${fmt(totalInvest)}</div><div class="stat-sub">${investments.length} SIPs</div></div>
+    <div class="stat-card"><div class="stat-label">Total Debt</div><div class="stat-value red">${fmtL(totalDebt)}</div><div class="stat-sub">Outstanding</div></div>
+    <div class="stat-card"><div class="stat-label">Est. Investment Returns</div><div class="stat-value accent">${fmtL(totalEstReturns)}</div><div class="stat-sub">Long-term projection</div></div>
+  `;
+
+  // Summary table
+  document.getElementById('summary-table').innerHTML = `
+    <tbody>
+      <tr><td>Rental + PF Income</td><td>${fmt(totalIncome)}</td></tr>
+      <tr><td>Recurring Expenses</td><td style="color:var(--red)">−${fmt(totalExpense)}</td></tr>
+      <tr><td>Loan EMIs (Long-term)</td><td style="color:var(--red)">−${fmt(totalLoanEMI)}</td></tr>
+      <tr><td>Short-term Loan EMIs</td><td style="color:var(--red)">−${fmt(totalShortEMI)}</td></tr>
+      <tr><td>Monthly Investments</td><td style="color:var(--accent2)">−${fmt(totalInvest)}</td></tr>
+      <tr class="total"><td>Net Cash Flow</td><td style="color:${net >= 0 ? 'var(--green)' : 'var(--red)'}">${fmt(net)}</td></tr>
+    </tbody>
+  `;
+
+  // Charts
+  destroyChart('cashflow-chart');
+  destroyChart('expense-pie-chart');
+
+  chartInstances['cashflow-chart'] = new Chart(document.getElementById('cashflow-chart'), {
+    type: 'bar',
+    data: {
+      labels: ['Income', 'Expenses', 'Loan EMIs', 'Investments', 'Net'],
+      datasets: [{
+        data: [totalIncome, totalExpense, totalLoanEMI + totalShortEMI, totalInvest, Math.abs(net)],
+        backgroundColor: ['rgba(52,211,153,0.7)', 'rgba(248,113,113,0.7)', 'rgba(251,191,36,0.7)', 'rgba(167,139,250,0.7)', net >= 0 ? 'rgba(52,211,153,0.7)' : 'rgba(248,113,113,0.7)'],
+        borderRadius: 6,
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#8a94aa' }, grid: { color: '#1e2330' } }, y: { ticks: { color: '#8a94aa', callback: v => fmtL(v) }, grid: { color: '#1e2330' } } } }
   });
-  html+='</div></div>';
-  return html;
-}
 
-function toggleR(el){
-  el.classList.toggle('open');
-  el.nextElementSibling.classList.toggle('open');
-  el.querySelector('.chevron').textContent=el.classList.contains('open')?'−':'+';
-}
+  const pieData = [
+    { label: 'Expenses', value: totalExpense, color: 'rgba(248,113,113,0.8)' },
+    { label: 'Loan EMIs', value: totalLoanEMI + totalShortEMI, color: 'rgba(251,191,36,0.8)' },
+    { label: 'Investments', value: totalInvest, color: 'rgba(167,139,250,0.8)' },
+  ].filter(x => x.value > 0);
 
-function calcBatch(){
-  var price=parseFloat(document.getElementById('b-dataset').value)||1;
-  var domains=parseInt(document.getElementById('b-domains').value)||1;
-  var metrics=parseInt(document.getElementById('b-metrics').value)||1;
-  var cadence=parseInt(document.getElementById('b-cadence').value)||1;
-  var months=parseInt(document.getElementById('b-months').value)||1;
-  var countries=parseInt(document.getElementById('b-countries').value)||1;
-  var total=domains*price*metrics*cadence*months*countries;
-  batchTotal=total;
-  updateBudgetBar();
-
-  var html='<div class="result-block">'
-    +'<div class="result-title">Estimated credits</div>'
-    +'<div class="result-total">'+fmt(total)+'</div>'
-    +'<div class="result-sub">for this query configuration</div>'
-    +budgetProgressHtml(total,'batch')
-    +'<div class="stats-row">'
-    +'<div class="stat-box"><div class="stat-lbl">Domains</div><div class="stat-val">'+fmt(domains)+'</div></div>'
-    +'<div class="stat-box"><div class="stat-lbl">Metrics</div><div class="stat-val">'+fmt(metrics)+'</div></div>'
-    +'<div class="stat-box"><div class="stat-lbl">Countries</div><div class="stat-val">'+fmt(countries)+'</div></div>'
-    +'</div>'
-    +'<table class="breakdown-table">'
-    +'<tr><td>Domains</td><td>'+fmt(domains)+'</td></tr>'
-    +'<tr><td>× metric price</td><td>'+price+'</td></tr>'
-    +'<tr><td>× '+fmt(metrics)+' metrics</td><td>'+fmt(domains*price*metrics)+'</td></tr>'
-    +'<tr><td>× cadence ×'+cadence+'</td><td>'+fmt(domains*price*metrics*cadence)+'</td></tr>'
-    +'<tr><td>× '+months+' months</td><td>'+fmt(domains*price*metrics*cadence*months)+'</td></tr>'
-    +'<tr><td>× '+countries+' countr'+(countries>1?'ies':'y')+'</td><td>'+fmt(total)+'</td></tr>'
-    +'</table>'
-    +'<div style="font-size:11px;color:var(--text3);margin-top:.6rem">Tip: use <code>request-validate</code> endpoint for a pre-run estimate before executing large jobs.</div>'
-    +'</div>';
-  document.getElementById('batch-result').innerHTML=html;
-
-  var r=[];
-  if(domains>10000) r.push({type:'red',name:'Domain limit exceeded',desc:'Batch API supports a maximum of ~10,000 domains per request. Split into multiple calls.'});
-  if(months>61) r.push({type:'red',name:'Historical data cap',desc:'Most traffic metrics support up to 61 months. Keywords max 27 months. Firmographics: 1 month only.'});
-  if(price===0.01&&months>27) r.push({type:'red',name:'Keywords history limit',desc:'Keywords datasets only support up to 27 months of historical data.'});
-  if(cadence===30) r.push({type:'amber',name:'Daily cadence — high credit burn',desc:'Daily granularity multiplies credits by 30×. Use monthly or weekly for trend analysis unless daily precision is required.'});
-  if(countries>5) r.push({type:'amber',name:'High country filter count',desc:'Each country filter multiplies credits linearly. Consider using the global filter where granularity allows.'});
-  if(months>37&&price===1&&document.getElementById('b-dataset').selectedIndex>=1) r.push({type:'amber',name:'Historical limit varies by dataset',desc:'Some datasets (referrals, demographics) cap at 37 months, not 61. Excess months return no data — no charge, but wasted configuration.'});
-  r.push({type:'blue',name:'Credits expire monthly',desc:'Unused credits do not roll over. Plan queries to stay within your monthly allowance.'});
-  r.push({type:'blue',name:'Use request-validate before large jobs',desc:'Call the request-validate endpoint to get a pre-run credit estimate without consuming credits.'});
-  r.push({type:'green',name:'No charge for empty results',desc:'API calls that return no data for a domain/metric are not billed.'});
-  document.getElementById('batch-restrictions').innerHTML=buildRestrictions(r);
-}
-
-function calcRest(){
-  var domains=parseInt(document.getElementById('r-domains').value)||1;
-  var metrics=parseInt(document.getElementById('r-metrics').value)||1;
-  var cadence=parseInt(document.getElementById('r-cadence').value)||1;
-  var months=parseInt(document.getElementById('r-months').value)||1;
-  var countries=parseInt(document.getElementById('r-countries').value)||1;
-  var calls=parseInt(document.getElementById('r-calls').value)||1;
-  var perQuery=domains*metrics*cadence*months*countries;
-  var total=perQuery*calls;
-  restTotal=total;
-  updateBudgetBar();
-
-  var html='<div class="result-block">'
-    +'<div class="result-title">Estimated monthly credits</div>'
-    +'<div class="result-total">'+fmt(total)+'</div>'
-    +'<div class="result-sub">'+fmt(calls)+' call'+(calls>1?'s':'')+' × '+fmt(perQuery)+' credits/run</div>'
-    +budgetProgressHtml(total,'rest')
-    +'<div class="stats-row">'
-    +'<div class="stat-box"><div class="stat-lbl">Per query run</div><div class="stat-val">'+fmt(perQuery)+'</div></div>'
-    +'<div class="stat-box"><div class="stat-lbl">Calls/month</div><div class="stat-val">'+fmt(calls)+'</div></div>'
-    +'<div class="stat-box"><div class="stat-lbl">Monthly total</div><div class="stat-val">'+fmt(total)+'</div></div>'
-    +'</div>'
-    +'<table class="breakdown-table">'
-    +'<tr><td>Domains</td><td>'+fmt(domains)+'</td></tr>'
-    +'<tr><td>× '+fmt(metrics)+' metrics</td><td>'+fmt(domains*metrics)+'</td></tr>'
-    +'<tr><td>× cadence ×'+cadence+'</td><td>'+fmt(domains*metrics*cadence)+'</td></tr>'
-    +'<tr><td>× '+months+' months</td><td>'+fmt(domains*metrics*cadence*months)+'</td></tr>'
-    +'<tr><td>× '+countries+' countr'+(countries>1?'ies':'y')+'</td><td>'+fmt(perQuery)+'</td></tr>'
-    +'<tr><td>× '+fmt(calls)+' API calls/month</td><td>'+fmt(total)+'</td></tr>'
-    +'</table>'
-    +'</div>';
-  document.getElementById('rest-result').innerHTML=html;
-
-  var r=[];
-  if(cadence===30) r.push({type:'amber',name:'Daily cadence — high credit burn',desc:'Daily granularity multiplies credits by 30×. Only use if daily resolution is essential.'});
-  if(months>61) r.push({type:'red',name:'Historical data cap',desc:'Most REST endpoints support up to 61 months. Check endpoint-specific limits in the API documentation.'});
-  if(countries>10) r.push({type:'amber',name:'Many country filters',desc:'Each country filter multiplies credit usage linearly. Batch country calls carefully.'});
-  r.push({type:'blue',name:'Credits expire monthly',desc:'Unused credits do not roll over to the following month.'});
-  r.push({type:'blue',name:'Rate limits apply',desc:'REST API has per-endpoint rate limits. Implement exponential backoff to handle 429 errors gracefully.'});
-  r.push({type:'blue',name:'Pagination counts',desc:'Paginated results consume credits for each page. Only paginate as far as you need.'});
-  r.push({type:'green',name:'No charge for empty results',desc:'Calls that return no data are not billed — this protects against querying domains with no Similarweb coverage.'});
-  document.getElementById('rest-restrictions').innerHTML=buildRestrictions(r);
-}
-
-function calcMcp(){
-  var type=document.getElementById('m-type').value;
-  var users=parseInt(document.getElementById('m-users').value)||1;
-  document.getElementById('mcp-custom-fields').style.display=type==='custom'?'block':'none';
-  var low,high;
-  if(type==='avg'){low=5000;high=10000;}
-  else if(type==='power'){low=50000;high=500000;}
-  else{
-    var p=parseInt(document.getElementById('m-prompts').value)||10;
-    var c=parseInt(document.getElementById('m-cpp').value)||3;
-    var pts=parseInt(document.getElementById('m-points').value)||100;
-    var d=parseInt(document.getElementById('m-days').value)||22;
-    var pd=p*c*pts*d;
-    low=Math.round(pd*0.7); high=Math.round(pd*2);
-  }
-  var tl=low*users, th=high*users, mid=Math.round((tl+th)/2);
-  mcpLow=tl; mcpHigh=th;
-  updateBudgetBar();
-
-  var html='<div class="result-block">'
-    +'<div class="result-title">Estimated monthly credit range</div>'
-    +'<div class="result-total">'+fmt(tl)+' – '+fmt(th)+'</div>'
-    +'<div class="result-sub">across '+fmt(users)+' user'+(users>1?'s':'')+' · midpoint: '+fmt(mid)+'</div>'
-    +budgetProgressHtml(mid,'mcp')
-    +'<div class="stats-row">'
-    +'<div class="stat-box"><div class="stat-lbl">Low estimate</div><div class="stat-val">'+fmt(tl)+'</div><div class="stat-sub">per month</div></div>'
-    +'<div class="stat-box"><div class="stat-lbl">Midpoint</div><div class="stat-val">'+fmt(mid)+'</div><div class="stat-sub">per month</div></div>'
-    +'<div class="stat-box"><div class="stat-lbl">High estimate</div><div class="stat-val">'+fmt(th)+'</div><div class="stat-sub">per month</div></div>'
-    +'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin-top:.5rem">Directional only. Check DaaS tracking dashboard MCP page for actuals from comparable accounts.</div>'
-    +'</div>';
-  document.getElementById('mcp-result').innerHTML=html;
-
-  var r=[];
-  r.push({type:'red',name:'Unpredictable credit burns',desc:'A single MCP prompt can trigger 2–6+ API calls. One prompt querying Meta used 568,000 credits. Monitor Credit Management dashboard at all times.'});
-  r.push({type:'red',name:'No real-time credit output (yet)',desc:'Real-time per-query credit reporting is coming. Until then there is no live view of usage per MCP prompt as it runs.'});
-  r.push({type:'amber',name:'Multiple endpoint calls per prompt',desc:'Each AI model approaches prompts differently and may call the same endpoint multiple times or explore related endpoints unpredictably.'});
-  r.push({type:'amber',name:'Credit mapping not yet validated',desc:'MCP credit-to-query estimates are directional only — validation with Product is ongoing. Treat all estimates as approximate.'});
-  r.push({type:'amber',name:'Shared credit pool',desc:'MCP users share the same credit pool as REST and Batch API. Heavy MCP usage can deplete credits available for other automated workflows.'});
-  r.push({type:'blue',name:'Credits expire monthly',desc:'Unused credits do not roll over. Check the DaaS tracking dashboard MCP page for actual usage from similar accounts.'});
-  r.push({type:'green',name:'No charge for empty results',desc:'If an MCP-triggered API call returns no data, no credits are charged — same rule as direct API access.'});
-  document.getElementById('mcp-restrictions').innerHTML=buildRestrictions(r);
-}
-
-function renderCompare(){
-  var budget=getBudget();
-  var mid=Math.round((mcpLow+mcpHigh)/2);
-  var vals=[batchTotal,restTotal,mid];
-  var names=['Batch API','REST API','MCP (mid)'];
-  var colors=['#378add','#1d9e75','#ba7517'];
-  var maxV=Math.max.apply(null,vals)||1;
-  var total=batchTotal+restTotal+mid;
-  var highestIdx=vals.indexOf(Math.max.apply(null,vals));
-
-  var grid='';
-  vals.forEach(function(v,i){
-    var p=pct(v,budget);
-    grid+='<div class="cmp-card'+(i===highestIdx?' winner':'')+'">'+( i===highestIdx?'<span class="cmp-tag">highest</span>':'' )
-      +'<div class="cmp-name">'+names[i]+'</div>'
-      +'<div class="cmp-val">'+fmt(v)+'</div>'
-      +(budget?'<div class="cmp-pct">'+p+'% of budget</div>':'')
-      +'<div class="cmp-bar" style="background:'+colors[i]+';width:'+Math.round(v/maxV*100)+'%"></div>'
-      +'</div>';
+  chartInstances['expense-pie-chart'] = new Chart(document.getElementById('expense-pie-chart'), {
+    type: 'doughnut',
+    data: { labels: pieData.map(x => x.label), datasets: [{ data: pieData.map(x => x.value), backgroundColor: pieData.map(x => x.color), borderWidth: 0, hoverOffset: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8a94aa', padding: 12, font: { size: 12 } } } }, cutout: '62%' }
   });
-  document.getElementById('compare-cards').innerHTML=grid;
+}
 
-  var ctx=document.getElementById('compare-chart').getContext('2d');
-  if(cmpChart)cmpChart.destroy();
-  var datasets=[{
-    label:'Credits',
-    data:vals,
-    backgroundColor:colors,
-    borderWidth:0,
-    borderRadius:6
-  }];
-  if(budget){
-    datasets.push({
-      label:'Budget',
-      data:[budget,budget,budget],
-      type:'line',
-      borderColor:'#e24b4a',
-      borderWidth:1.5,
-      borderDash:[5,4],
-      pointRadius:0,
-      fill:false
-    });
+// ===== INCOME =====
+function renderIncome() {
+  const rows = filterByUser(DATA.income);
+  document.getElementById('income-tbody').innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td><span class="pill ongoing">${r.user}</span></td>
+      <td style="color:var(--green);font-weight:600;">${fmt(r.amount)}</td>
+      <td>${r.type || '—'}</td>
+      <td><span class="pill ongoing">${r.status}</span></td>
+      <td><div class="td-actions">
+        <button class="icon-btn" onclick="openEdit('income','${r.id}')">✏️</button>
+        <button class="icon-btn del" onclick="deleteEntry('income','${r.id}')">🗑</button>
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">No income entries</td></tr>';
+}
+
+// ===== EXPENSES =====
+function renderExpenses() {
+  const rows = filterByUser(DATA.expenses);
+  document.getElementById('expense-tbody').innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td><span class="pill ongoing">${r.user}</span></td>
+      <td style="color:var(--red);font-weight:600;">${fmt(r.amount)}</td>
+      <td>${r.frequency || 'Monthly'}</td>
+      <td>${r.tenure || '—'}</td>
+      <td><span class="pill ${r.status === 'Ongoing' ? 'ongoing' : 'completed'}">${r.status}</span></td>
+      <td><div class="td-actions">
+        <button class="icon-btn" onclick="openEdit('expense','${r.id}')">✏️</button>
+        <button class="icon-btn del" onclick="deleteEntry('expense','${r.id}')">🗑</button>
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px">No expense entries</td></tr>';
+}
+
+// ===== LOANS =====
+function renderLoans() {
+  const rows = filterByUser(DATA.loans);
+  const shortRows = filterByUser(DATA.shortLoans);
+
+  // Stats
+  const totalDebt = rows.filter(l => l.status !== 'Completed').reduce((s, x) => s + x.outstanding, 0);
+  const totalShortDebt = shortRows.reduce((s, x) => s + x.outstanding, 0);
+  const totalEMI = rows.filter(l => l.status !== 'Completed').reduce((s, x) => s + x.emi, 0);
+  const totalShortEMI = shortRows.reduce((s, x) => s + x.emi, 0);
+
+  document.getElementById('loan-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Long-term Debt</div><div class="stat-value red">${fmtL(totalDebt)}</div><div class="stat-sub">Outstanding principal</div></div>
+    <div class="stat-card"><div class="stat-label">Short-term Debt</div><div class="stat-value red">${fmtL(totalShortDebt)}</div><div class="stat-sub">${shortRows.length} app loans</div></div>
+    <div class="stat-card"><div class="stat-label">Monthly EMI (Long)</div><div class="stat-value yellow">${fmt(totalEMI)}</div></div>
+    <div class="stat-card"><div class="stat-label">Monthly EMI (Short)</div><div class="stat-value yellow">${fmt(totalShortEMI)}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Monthly EMI</div><div class="stat-value red">${fmt(totalEMI + totalShortEMI)}</div></div>
+  `;
+
+  document.getElementById('loan-tbody').innerHTML = rows.map(r => {
+    const ml = monthsLeft(r.endDate);
+    const pct = r.principal ? Math.round((1 - r.outstanding / (r.principal + r.interestTotal)) * 100) : 0;
+    return `<tr>
+      <td>${r.name}</td>
+      <td><span class="pill ongoing">${r.user}</span></td>
+      <td style="color:var(--yellow);font-weight:600;">${fmt(r.emi)}</td>
+      <td style="color:var(--red);">${fmtL(r.outstanding)}</td>
+      <td>${r.endDate || '—'}</td>
+      <td><span class="emi-info"><span class="months-left">${ml !== null ? ml + ' mo' : r.status}</span></span></td>
+      <td>${r.interestTotal ? fmtL(r.interestTotal) : '—'}</td>
+      <td><span class="pill ${r.status === 'Completed' ? 'completed' : 'ongoing'}">${r.status}</span></td>
+      <td><div class="td-actions">
+        <button class="icon-btn" onclick="openEdit('loan','${r.id}')">✏️</button>
+        <button class="icon-btn del" onclick="deleteEntry('loan','${r.id}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:20px">No loans</td></tr>';
+
+  document.getElementById('short-loan-tbody').innerHTML = shortRows.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td><span class="pill ongoing">${r.user}</span></td>
+      <td style="color:var(--yellow);font-weight:600;">${fmt(r.emi)}</td>
+      <td style="color:var(--red);">${fmt(r.outstanding)}</td>
+      <td><span class="months-left" style="color:var(--yellow);font-weight:600;">${r.months} mo</span></td>
+      <td>${r.interestRate > 0 ? r.interestRate + '% p.a.' : 'Interest-free'}</td>
+      <td><div class="td-actions">
+        <button class="icon-btn" onclick="openEdit('shortLoan','${r.id}')">✏️</button>
+        <button class="icon-btn del" onclick="deleteEntry('shortLoan','${r.id}')">🗑</button>
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px">No short-term loans</td></tr>';
+}
+
+// ===== INVESTMENTS =====
+function renderInvestments() {
+  const rows = filterByUser(DATA.investments);
+  const totalMonthly = rows.reduce((s, x) => s + x.monthly, 0);
+  const totalEst = rows.reduce((s, x) => s + x.estReturns, 0);
+
+  document.getElementById('invest-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Monthly SIP</div><div class="stat-value" style="color:var(--accent2)">${fmt(totalMonthly)}</div></div>
+    <div class="stat-card"><div class="stat-label">Est. Total Returns</div><div class="stat-value accent">${fmtL(totalEst)}</div><div class="stat-sub">Long-term projection</div></div>
+    <div class="stat-card"><div class="stat-label">Active Investments</div><div class="stat-value accent">${rows.filter(r => r.status === 'Ongoing').length}</div></div>
+  `;
+
+  document.getElementById('invest-tbody').innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td><span class="pill ongoing">${r.user}</span></td>
+      <td style="color:var(--accent2);font-weight:600;">${fmt(r.monthly)}</td>
+      <td>${r.totalInvested ? fmtL(r.totalInvested) : '—'}</td>
+      <td style="color:var(--green);">${r.estReturns ? fmtL(r.estReturns) : '—'}</td>
+      <td>${r.endYear || '—'}</td>
+      <td><span class="pill ${r.status === 'Ongoing' ? 'ongoing' : 'completed'}">${r.status}</span></td>
+      <td><div class="td-actions">
+        <button class="icon-btn" onclick="openEdit('investment','${r.id}')">✏️</button>
+        <button class="icon-btn del" onclick="deleteEntry('investment','${r.id}')">🗑</button>
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:20px">No investments</td></tr>';
+}
+
+// ===== LENDING =====
+function renderLending() {
+  const rows = currentUser === 'family' ? DATA.lending : DATA.lending.filter(x => x.lentBy === currentUser);
+  document.getElementById('lending-tbody').innerHTML = rows.map(r => {
+    const isOverdue = r.dueDate && new Date(r.dueDate + '-01') < new Date() && r.status !== 'Repaid';
+    return `<tr>
+      <td>${r.name}</td>
+      <td><span class="pill ongoing">${r.lentBy}</span></td>
+      <td>${r.date || '—'}</td>
+      <td style="color:var(--yellow);">${fmt(r.lentAmount)}</td>
+      <td style="color:var(--red);font-weight:600;">${fmt(r.balance)}</td>
+      <td>${r.dueDate || '—'}</td>
+      <td><span class="pill ${isOverdue ? 'overdue' : r.status === 'Repaid' ? 'completed' : 'ongoing'}">${isOverdue ? 'Overdue' : r.status}</span></td>
+      <td><div class="td-actions">
+        <button class="icon-btn" onclick="openEdit('lending','${r.id}')">✏️</button>
+        <button class="icon-btn del" onclick="deleteEntry('lending','${r.id}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:20px">No lending entries</td></tr>';
+}
+
+// ===== CHARTS =====
+function renderCharts() {
+  destroyChart('debt-timeline-chart');
+  destroyChart('debt-user-chart');
+  destroyChart('preeth-debt-chart');
+  destroyChart('emi-vs-income-chart');
+
+  const now = new Date();
+  const labels = [];
+  const preethData = [], keerthnaData = [], totalData = [];
+
+  // Get Preeth loans
+  const preethLoans = DATA.loans.filter(l => l.user === 'preeth' && l.status !== 'Completed');
+  const preethShort = DATA.shortLoans.filter(l => l.user === 'preeth');
+
+  // Generate 36 months timeline
+  for (let i = 0; i <= 36; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    labels.push(d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' }));
+
+    let pDebt = preethLoans.reduce((s, l) => {
+      const ml = monthsLeft(l.endDate);
+      return s + (ml === null || i <= (ml || 0) ? Math.max(0, l.outstanding - l.emi * i * 0.6) : 0);
+    }, 0) + preethShort.reduce((s, l) => s + Math.max(0, l.outstanding - l.emi * i), 0);
+    preethData.push(Math.max(0, pDebt));
+
+    let kDebt = DATA.loans.filter(l => l.user === 'keerthna' && l.status !== 'Completed').reduce((s, l) => s + Math.max(0, l.outstanding - l.emi * i), 0);
+    keerthnaData.push(Math.max(0, kDebt));
+    totalData.push(Math.max(0, pDebt + kDebt));
   }
-  cmpChart=new Chart(ctx,{
-    type:'bar',
-    data:{labels:names,datasets:datasets},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        y:{beginAtZero:true,ticks:{callback:function(v){return v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v},font:{size:11},color:'#8a9ab0'},grid:{color:'rgba(0,43,107,0.05)'}},
-        x:{ticks:{font:{size:12},color:'#4a5f7a'},grid:{display:false}}
-      }
+
+  chartInstances['debt-timeline-chart'] = new Chart(document.getElementById('debt-timeline-chart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Total', data: totalData, borderColor: 'rgba(248,113,113,0.9)', backgroundColor: 'rgba(248,113,113,0.08)', tension: 0.4, fill: true, pointRadius: 2 },
+        { label: 'Preeth', data: preethData, borderColor: 'rgba(251,191,36,0.8)', backgroundColor: 'rgba(251,191,36,0.05)', tension: 0.4, fill: false, pointRadius: 2 },
+        { label: 'Keerthna', data: keerthnaData, borderColor: 'rgba(108,142,255,0.8)', backgroundColor: 'rgba(108,142,255,0.05)', tension: 0.4, fill: false, pointRadius: 2 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8a94aa', font: { size: 11 } } } }, scales: { x: { ticks: { color: '#8a94aa', maxTicksLimit: 12, font: { size: 10 } }, grid: { color: '#1e2330' } }, y: { ticks: { color: '#8a94aa', callback: v => fmtL(v), font: { size: 10 } }, grid: { color: '#1e2330' } } } }
+  });
+
+  // Debt by user donut
+  const userDebts = {
+    'Preeth': DATA.loans.filter(l => l.user === 'preeth' && l.status !== 'Completed').reduce((s, x) => s + x.outstanding, 0) + DATA.shortLoans.filter(l => l.user === 'preeth').reduce((s, x) => s + x.outstanding, 0),
+    'Keerthna': DATA.loans.filter(l => l.user === 'keerthna' && l.status !== 'Completed').reduce((s, x) => s + x.outstanding, 0),
+    'Padma': 0,
+  };
+
+  chartInstances['debt-user-chart'] = new Chart(document.getElementById('debt-user-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(userDebts),
+      datasets: [{ data: Object.values(userDebts), backgroundColor: ['rgba(248,113,113,0.8)', 'rgba(108,142,255,0.8)', 'rgba(52,211,153,0.8)'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8a94aa', padding: 10, font: { size: 12 } } }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmtL(ctx.raw)}` } } }, cutout: '60%' }
+  });
+
+  // Preeth individual loan payoff
+  const preethLabels = [], hdfc = [], icici = [], short = [];
+  for (let i = 0; i <= 60; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    preethLabels.push(d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' }));
+    const hdfcLoan = DATA.loans.find(l => l.id === 'l1');
+    const iciciLoan = DATA.loans.find(l => l.id === 'l2');
+    hdfc.push(hdfcLoan ? Math.max(0, hdfcLoan.outstanding - hdfcLoan.emi * i * 0.65) : 0);
+    icici.push(iciciLoan ? Math.max(0, iciciLoan.outstanding - iciciLoan.emi * i * 0.65) : 0);
+    short.push(Math.max(0, DATA.shortLoans.filter(l => l.user === 'preeth').reduce((s, l) => s + Math.max(0, l.outstanding - l.emi * i), 0)));
+  }
+
+  chartInstances['preeth-debt-chart'] = new Chart(document.getElementById('preeth-debt-chart'), {
+    type: 'line',
+    data: {
+      labels: preethLabels,
+      datasets: [
+        { label: 'HDFC PL', data: hdfc, borderColor: 'rgba(248,113,113,0.9)', tension: 0.4, fill: false, pointRadius: 0 },
+        { label: 'ICICI PL', data: icici, borderColor: 'rgba(251,191,36,0.9)', tension: 0.4, fill: false, pointRadius: 0 },
+        { label: 'Short-term', data: short, borderColor: 'rgba(167,139,250,0.9)', tension: 0.4, fill: false, pointRadius: 0 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8a94aa', font: { size: 11 } } } }, scales: { x: { ticks: { color: '#8a94aa', maxTicksLimit: 12, font: { size: 10 } }, grid: { color: '#1e2330' } }, y: { ticks: { color: '#8a94aa', callback: v => fmtL(v), font: { size: 10 } }, grid: { color: '#1e2330' } } } }
+  });
+
+  // EMI vs Income bar
+  const totalIncome = DATA.income.reduce((s, x) => s + x.amount, 0);
+  const totalEMI = DATA.loans.filter(l => l.status !== 'Completed').reduce((s, x) => s + x.emi, 0) + DATA.shortLoans.reduce((s, x) => s + x.emi, 0);
+  const totalExp = DATA.expenses.reduce((s, x) => s + x.amount, 0);
+  const totalInvest = DATA.investments.reduce((s, x) => s + x.monthly, 0);
+
+  chartInstances['emi-vs-income-chart'] = new Chart(document.getElementById('emi-vs-income-chart'), {
+    type: 'bar',
+    data: {
+      labels: ['Rental Income', 'Loan EMIs', 'Recurring Exp.', 'Investments', 'Net'],
+      datasets: [{
+        data: [totalIncome, totalEMI, totalExp, totalInvest, totalIncome - totalEMI - totalExp - totalInvest],
+        backgroundColor: ['rgba(52,211,153,0.7)', 'rgba(248,113,113,0.7)', 'rgba(251,191,36,0.7)', 'rgba(167,139,250,0.7)', (totalIncome - totalEMI - totalExp - totalInvest) >= 0 ? 'rgba(52,211,153,0.7)' : 'rgba(248,113,113,0.7)'],
+        borderRadius: 6
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#8a94aa', font: { size: 11 } }, grid: { color: '#1e2330' } }, y: { ticks: { color: '#8a94aa', callback: v => fmtL(v), font: { size: 10 } }, grid: { color: '#1e2330' } } } }
+  });
+
+  // Milestone table
+  const allLoans = [...DATA.loans.filter(l => l.status !== 'Completed'), ...DATA.shortLoans.map(l => ({ ...l, endDate: null, emi: l.emi, outstanding: l.outstanding, interestTotal: 0, name: l.name + ' (App)' }))];
+  document.getElementById('milestone-tbody').innerHTML = allLoans.map(l => {
+    const ml = monthsLeft(l.endDate);
+    const total = l.outstanding + (l.interestTotal || 0);
+    const pct = total > 0 ? Math.round(((l.principal || l.outstanding) / (l.principal + (l.interestTotal || 0))) * 100) : 0;
+    return `<tr>
+      <td>${l.name}</td>
+      <td><span class="pill ongoing">${l.user}</span></td>
+      <td style="color:var(--red)">${fmtL(l.outstanding)}</td>
+      <td style="color:var(--yellow)">${fmt(l.emi)}</td>
+      <td>${l.endDate || (l.months ? l.months + ' mo left' : '—')}</td>
+      <td>
+        <div class="progress-wrap" style="min-width:100px">
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--accent)"></div></div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">${pct}% paid</div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+// ===== MODAL =====
+const FIELDS = {
+  income: [
+    { key: 'name', label: 'Source Name', type: 'text' },
+    { key: 'amount', label: 'Amount (₹/month)', type: 'number' },
+    { key: 'user', label: 'User', type: 'select', options: ['family', 'preeth', 'padma', 'keerthna'] },
+    { key: 'type', label: 'Type', type: 'text', placeholder: 'e.g. Rental, Salary, PF' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Ongoing', 'Paused', 'Stopped'] },
+  ],
+  expense: [
+    { key: 'name', label: 'Expense Name', type: 'text' },
+    { key: 'amount', label: 'Amount (₹/month)', type: 'number' },
+    { key: 'user', label: 'User', type: 'select', options: ['family', 'preeth', 'padma', 'keerthna'] },
+    { key: 'frequency', label: 'Frequency', type: 'select', options: ['Monthly', 'Annual', 'Quarterly'] },
+    { key: 'tenure', label: 'Tenure', type: 'text', placeholder: 'EOL, Recurring, date…' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Ongoing', 'Completed', 'Paused'] },
+  ],
+  loan: [
+    { key: 'name', label: 'Loan Name', type: 'text' },
+    { key: 'user', label: 'User', type: 'select', options: ['preeth', 'padma', 'keerthna', 'family'] },
+    { key: 'emi', label: 'EMI (₹/month)', type: 'number' },
+    { key: 'outstanding', label: 'Outstanding Amount (₹)', type: 'number' },
+    { key: 'principal', label: 'Original Principal (₹)', type: 'number' },
+    { key: 'endDate', label: 'End Date (YYYY-MM)', type: 'text', placeholder: 'e.g. 2031-02' },
+    { key: 'interestTotal', label: 'Total Interest Component (₹)', type: 'number' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Ongoing', 'Completed'] },
+  ],
+  shortLoan: [
+    { key: 'name', label: 'Provider Name', type: 'text' },
+    { key: 'user', label: 'User', type: 'select', options: ['preeth', 'padma', 'keerthna', 'family'] },
+    { key: 'emi', label: 'EMI (₹/month)', type: 'number' },
+    { key: 'outstanding', label: 'Outstanding (₹)', type: 'number' },
+    { key: 'months', label: 'Months Remaining', type: 'number' },
+    { key: 'interestRate', label: 'Interest Rate (% p.a.)', type: 'number' },
+  ],
+  investment: [
+    { key: 'name', label: 'Investment Name', type: 'text' },
+    { key: 'user', label: 'User', type: 'select', options: ['preeth', 'padma', 'keerthna', 'family'] },
+    { key: 'monthly', label: 'Monthly SIP (₹)', type: 'number' },
+    { key: 'totalInvested', label: 'Total Invested (₹)', type: 'number' },
+    { key: 'estReturns', label: 'Estimated Returns (₹)', type: 'number' },
+    { key: 'endYear', label: 'End Year', type: 'number', placeholder: 'e.g. 2054' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Ongoing', 'Completed', 'Paused'] },
+  ],
+  lending: [
+    { key: 'name', label: 'Borrower Name', type: 'text' },
+    { key: 'lentBy', label: 'Lent By', type: 'select', options: ['preeth', 'padma', 'keerthna', 'family'] },
+    { key: 'date', label: 'Date (YYYY-MM)', type: 'text' },
+    { key: 'lentAmount', label: 'Amount Lent (₹)', type: 'number' },
+    { key: 'balance', label: 'Balance Remaining (₹)', type: 'number' },
+    { key: 'dueDate', label: 'Due Date (YYYY-MM)', type: 'text' },
+    { key: 'status', label: 'Status', type: 'select', options: ['Ongoing', 'Partially Repaid', 'Repaid'] },
+  ],
+};
+
+const TYPE_LABELS = { income: 'Income', expense: 'Expense', loan: 'Long-term Loan', shortLoan: 'Short-term Loan', investment: 'Investment', lending: 'Lending' };
+const TYPE_TO_KEY = { income: 'income', expense: 'expenses', loan: 'loans', shortLoan: 'shortLoans', investment: 'investments', lending: 'lending' };
+
+let activeModalType = null;
+
+function openAddModal(type) {
+  if (type === 'auto') type = 'income';
+  activeModalType = type;
+  editingEntry = null;
+  document.getElementById('modal-title').textContent = 'Add ' + TYPE_LABELS[type];
+  renderModalBody(type, null);
+  document.getElementById('modal').classList.add('open');
+}
+
+function openEdit(type, id) {
+  activeModalType = type;
+  const key = TYPE_TO_KEY[type];
+  const entry = DATA[key].find(x => x.id === id);
+  editingEntry = entry;
+  document.getElementById('modal-title').textContent = 'Edit ' + TYPE_LABELS[type];
+  renderModalBody(type, entry);
+  document.getElementById('modal').classList.add('open');
+}
+
+function renderModalBody(type, entry) {
+  const fields = FIELDS[type] || [];
+  let html = '<div class="form-grid">';
+  fields.forEach(f => {
+    const val = entry ? (entry[f.key] ?? '') : '';
+    html += `<div class="form-group${fields.length === 1 ? ' full' : ''}">`;
+    html += `<label>${f.label}</label>`;
+    if (f.type === 'select') {
+      html += `<select id="field-${f.key}">` + f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o.charAt(0).toUpperCase() + o.slice(1)}</option>`).join('') + '</select>';
+    } else {
+      html += `<input type="${f.type}" id="field-${f.key}" value="${val}" placeholder="${f.placeholder || ''}" step="${f.type === 'number' ? 'any' : undefined}">`;
     }
+    html += '</div>';
   });
+  html += '</div>';
 
-  var totalBudgetPct=pct(total,budget);
-  var analysisCls=totalBudgetPct>=100?'a-red':totalBudgetPct>=80?'a-amber':'a-green';
-  var sym=totalBudgetPct>=100?'✕':totalBudgetPct>=80?'!':'✓';
-  var aText=totalBudgetPct>=100
-    ?'<b>Combined usage exceeds budget</b> by '+fmt(total-budget)+' credits.'
-    :'Combined usage is '+totalBudgetPct+'% of your monthly budget.';
+  // Add type switcher
+  html += `<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;"><span style="font-size:11px;color:var(--text-dim);margin-top:4px">Type:</span>` +
+    Object.keys(TYPE_LABELS).map(t => `<button class="btn" style="${t === type ? 'border-color:var(--accent);color:var(--accent)' : ''};padding:4px 10px;font-size:11px" onclick="switchModalType('${t}')">${TYPE_LABELS[t]}</button>`).join('') + '</div>';
 
-  document.getElementById('compare-analysis').innerHTML=
-    '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--text2);margin-bottom:.75rem">'
-    +'<b style="color:var(--text)">Combined monthly estimate:</b> '+fmt(total)+' credits'+(budget?' of '+fmt(budget)+' budget ('+totalBudgetPct+'%)':'')
-    +'<br>Batch: '+Math.round(batchTotal/(total||1)*100)+'% · REST: '+Math.round(restTotal/(total||1)*100)+'% · MCP: '+Math.round(mid/(total||1)*100)+'%'
-    +'</div>'
-    +(budget?'<div class="alert '+analysisCls+'"><i class="alert-icon">'+sym+'</i><div>'+aText+'</div></div>':'');
+  document.getElementById('modal-body').innerHTML = html;
 }
 
-function presetBatch(d,m,cad,mo,co){
-  document.getElementById('b-domains').value=d;
-  document.getElementById('b-metrics').value=m;
-  document.getElementById('b-cadence').value=cad;
-  document.getElementById('b-months').value=mo;
-  document.getElementById('b-countries').value=co;
-  calcBatch();
+function switchModalType(type) {
+  activeModalType = type;
+  editingEntry = null;
+  document.getElementById('modal-title').textContent = 'Add ' + TYPE_LABELS[type];
+  renderModalBody(type, null);
 }
-function presetRest(d,m,cad,mo,co,calls){
-  document.getElementById('r-domains').value=d;
-  document.getElementById('r-metrics').value=m;
-  document.getElementById('r-cadence').value=cad;
-  document.getElementById('r-months').value=mo;
-  document.getElementById('r-countries').value=co;
-  document.getElementById('r-calls').value=calls;
-  calcRest();
-}
-function updateAll(){ calcBatch(); calcRest(); calcMcp(); }
 
-calcBatch(); calcRest(); calcMcp();
+function saveEntry() {
+  const type = activeModalType;
+  const fields = FIELDS[type] || [];
+  const key = TYPE_TO_KEY[type];
+  const obj = {};
+  for (const f of fields) {
+    const el = document.getElementById('field-' + f.key);
+    if (!el) continue;
+    obj[f.key] = f.type === 'number' ? (parseFloat(el.value) || 0) : el.value;
+  }
+  if (!obj.name && !obj.lentBy) { toast('Please fill in required fields', 'error'); return; }
+
+  if (editingEntry) {
+    const idx = DATA[key].findIndex(x => x.id === editingEntry.id);
+    DATA[key][idx] = { ...editingEntry, ...obj };
+    toast('Entry updated ✓');
+  } else {
+    obj.id = genId();
+    DATA[key].push(obj);
+    toast('Entry added ✓');
+  }
+  closeModal();
+  saveData();
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  editingEntry = null;
+}
+
+function deleteEntry(type, id) {
+  if (!confirm('Delete this entry?')) return;
+  const key = TYPE_TO_KEY[type];
+  DATA[key] = DATA[key].filter(x => x.id !== id);
+  toast('Deleted');
+  saveData();
+}
+
+// ===== EXPORT / IMPORT =====
+function exportData() {
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'obleys_finance_' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Data exported ✓');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (imported.income && imported.expenses && imported.loans) {
+        DATA = imported;
+        saveData();
+        toast('Data imported successfully ✓');
+      } else { toast('Invalid file format', 'error'); }
+    } catch { toast('Failed to parse file', 'error'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+// ===== INIT =====
+renderAll();
 </script>
 </body>
 </html>
